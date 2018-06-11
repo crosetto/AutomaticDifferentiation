@@ -1,17 +1,19 @@
 # An idiom for Automatic Differentiation (AD) in C++17
 
 This example comes as a follow up from an example of generic programming, which we showed during a C++ course at CSCS a couple of 
-years ago. In that occasion
+years ago (see https://www.youtube.com/watch?v=cC9MtflQ_nI&t=2915s towards the end, and sorry for the poor quality). In that occasion
 the goal was to show that using C++14 and constexpr we could write expression templates and automatic differentiation idioms with
 a little effort and an effective syntax. The goal now is to show how this idiom can evolve using C++17 constexpr lambdas, further 
 reducing the coding effort. 
+
+DISCLAIMER: the purpose of this repo is to present a proof of concept, not a production-ready library, so all protections are skipped.
 
 To recap, we start from the goal to achieve:
 * Implementing univariate polynomials of the form
 ```C++
   constexpr auto expr = x*x*x+x*x+x
 ```
-  in which "x" is the independent variable. the "x"s are generic: could be real numbers, matrices, 
+  in which "x" is the independent variable. the "x"s are generic: might be real numbers, matrices, 
   vectors, functions, ...
 * Being able to lazily evaluate the expression
 ```C++
@@ -26,8 +28,13 @@ To recap, we start from the goal to achieve:
 constexpr auto expr_dd = D(D(expr));
 ```
 
+We will show how we can use constexpr lambdas and constexpr if to reduce simpliyf the code, and we show an extension of the grammar, including multivariate polyunomials and constant functions, so that we can take partial derivatives of polynomials like
+```C++
+auto expr = x*x*y+x*y*y*c(4.)+y*c(1.)+x;
+```
+
 ## In C++14
-We start by describing the C++14 original example. The features which make the example "C++14" are mainly the use of "auto" and "constexpr". The former is (very handy) syntactic sugar and could be avoided with some extra coding, the latter is a language feature which allows to reuse the same code for both compile-time and run-time calculation.
+We start by describing the C++14 original example. The features which make the example "C++14" are mainly the use of "auto" and "constexpr", both introduced from C++11 and made more usable since C++14. in a nutshell The former is (very handy) syntactic sugar and could be avoided with some extra coding, the latter is a language feature which allows to reuse the same code for both compile-time and run-time computations.
 We define a placeholder for the independent variable "x", which is implementing the identity function, and instantiate a global variable "x" in order to compy with the our target syntax
 
 ```C++
@@ -45,10 +52,9 @@ struct p {
 constexpr auto x = p();
 ```
 
-It's the turn of the expressions "plus" and "times": function objects whose evaluation in turn evaluates 
+We also define the expressions "plus" and "times": function objects whose evaluation in turn evaluates 
 the template arguments and returns their sum or multiplication respectively. 
-We also overload the operators "+" and "*" to meet the target API. All these
-object functions are literal types, and the overload of their ```operator()``` is declared constexpr
+We also overload the operators "+" and "*" to meet the target API.
 
 ```C++
 template <typename T1, typename T2>
@@ -86,7 +92,7 @@ operator*( T1 arg1, T2 arg2 )
 }
 ```
 Notice that there's no data members. The object functions representing the operations are stateless, 
-and all the information needed to parse an expression is contained in its type (which might be limiting, but for this simple example is ok).
+and all the information needed to parse an expression is contained in its type (which might be limiting, but for this simple example it's ok).
 So far so good, we can evaluate expressions at compile time or run time
 
 ```C++
