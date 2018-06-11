@@ -1,4 +1,4 @@
-#An idiom for Automatic Differentiation (AD) in C++17
+# An idiom for Automatic Differentiation (AD) in C++17
 
 This example comes as a follow up from an example of generic programming, which we showed during a C++ course at CSCS a couple of 
 years ago. In that occasion
@@ -188,7 +188,7 @@ template <typename T1>
 constexpr expr_derivative<T1>
 D (T1 arg1){
     return expr_derivative<T1>();}
-```C
+```
 
 We have now the full code for automatic differentiation of polynomials.
 
