@@ -1,15 +1,18 @@
 # An idiom for Automatic Differentiation (AD) in C++17
 
+Often one does not need the full complexity of a full automatic differentiation library, which may be difficult to "dominate" and to debug. Besides that the evolution of C++ makes
+it increasingly easy to implement yourself expression templates and AD. So here I'll write a step-by-step "tutorial" on how to implement it in modern C++.
+
 This example comes as a follow up from an example of generic programming, which we showed during a C++ course at CSCS a couple of 
-years ago (see https://www.youtube.com/watch?v=cC9MtflQ_nI&t=2915s towards the end, and sorry for the poor quality). In that occasion
-the goal was to show that using C++14 and constexpr we could write expression templates and automatic differentiation idioms with
+years ago ( https://www.youtube.com/watch?v=cC9MtflQ_nI&t=2015s towards the end, sorry for the poor quality). In that occasion
+the goal was to show that using C++14 and constexpr we could write expression templates and automatic differentiation with
 a little effort and an effective syntax. The goal now is to show how this idiom can evolve using C++17 constexpr lambdas, further 
 reducing the coding effort. 
 
 DISCLAIMER: the purpose of this repo is to present a proof of concept, not a production-ready library, so all protections are skipped.
 
 To recap, we start from the goal to achieve:
-* Implementing univariate polynomials of the form
+* Implementing "univariate polynomials"-like expressions of the form
 ```C++
   constexpr auto expr = x*x*x+x*x+x
 ```
@@ -28,13 +31,13 @@ To recap, we start from the goal to achieve:
 constexpr auto expr_dd = D(D(expr));
 ```
 
-We will show how we can use constexpr lambdas and constexpr if to reduce simpliyf the code, and we show an extension of the grammar, including multivariate polyunomials and constant functions, so that we can take partial derivatives of polynomials like
+We will show then how we can use "constexpr lambdas" and "constexpr if" to rewrite the same thing, and we show an extension of the grammar, including multivariate polynomials and constant functions, so that we can take partial derivatives of polynomials like
 ```C++
 auto expr = x*x*y+x*y*y*c(4.)+y*c(1.)+x;
 ```
 
 ## In C++14
-We start by describing the C++14 original example. The features which make the example "C++14" are mainly the use of "auto" and "constexpr", both introduced from C++11 and made more usable since C++14. in a nutshell The former is (very handy) syntactic sugar and could be avoided with some extra coding, the latter is a language feature which allows to reuse the same code for both compile-time and run-time computations.
+We start by describing the C++14 original example. The features which make the example "C++14" are mainly the use of "auto" and "constexpr", both introduced from C++11 and made more usable since C++14.
 We define a placeholder for the independent variable "x", which is implementing the identity function, and instantiate a global variable "x" in order to compy with the our target syntax
 
 ```C++
