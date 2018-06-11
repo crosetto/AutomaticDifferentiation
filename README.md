@@ -112,15 +112,14 @@ We create an expression for the derivative with a specialization for all the afo
 the case in which we take the derivative of a derivative expression.
 
 ```C++
-    template <typename T1>
-    struct expr_derivative{
-        using value_t = int;
-
-        template <typename T>
-        constexpr T operator()(T t_) const {
-            return 0;
-        }
-    };
+template <typename T1>
+struct expr_derivative{
+    using value_t = int;
+    template <typename T>
+    constexpr T operator()(T t_) const {
+        return 0;
+    }
+};
 
 template<>
 struct expr_derivative<p>{
