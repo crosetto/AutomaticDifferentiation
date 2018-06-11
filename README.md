@@ -67,7 +67,6 @@ We also overload the operators "+" and "*" to meet the target API. All these
 object functions are literal types, and the overload of their ```operator()``` is declared constexpr
 
 ```C++
-namespace expressions{
 template <typename T1, typename T2>
 struct expr_plus{
     template<typename T>
@@ -100,7 +99,6 @@ and all the information needed to parse an expression is contained in its type.
 So far so good, we can evaluate expressions at compile time or run time
 
 ```C++
-using namespace expressions;
 int main(){
     constexpr auto expr = x*x+x;
     static_assert(expr(6.)==42.);
@@ -193,7 +191,6 @@ D (T1 arg1){
 We have now the full code for automatic differentiation of polynomials.
 
 ```C++
-using namespace expressions;
 int main(){
     constexpr auto expr = D(D(x*x+x));
     static_assert(expr(6.)==42.);
