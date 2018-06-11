@@ -14,7 +14,7 @@ DISCLAIMER: the purpose of this repo is to present a proof of concept, not a pro
 To recap, we start from the goal to achieve:
 * Implementing "univariate polynomials"-like expressions of the form
 ```C++
-  constexpr auto expr = x*x*x+x*x+x
+  constexpr auto expr = x*x*x+x*x+x;
 ```
   in which "x" is the independent variable. the "x"s are generic: might be real numbers, matrices, 
   vectors, functions, ...
@@ -34,6 +34,9 @@ constexpr auto expr_dd = D(D(expr));
 We will show then how we can use "constexpr lambdas" and "constexpr if" to rewrite the same thing, and we show an extension of the grammar, including multivariate polynomials and constant functions, so that we can take partial derivatives of polynomials like
 ```C++
 auto expr = x*x*y+x*y*y*c(4.)+y*c(1.)+x;
+auto dx = Dx(expr);
+auto dy = Dy(expr);
+std::cout<<dx(1.)(2.)+dy(1.)(2.);
 ```
 
 ## In C++14
