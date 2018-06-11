@@ -24,8 +24,9 @@ To recap the C++14 original example, we start from the goal to achieve:
   constexpr res = expr(5.); 
 ```
 * Being able to compute the symbolic arbitrary order derivative of the expressions
+```C++
 constexpr auto expr_dd = D(D(expr));
-
+```
 
 We define a placeholder for the independent variable "x", which is implementing the identity function, and instantiate a global variable "x" in order to compy with the our target syntax
 
