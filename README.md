@@ -6,9 +6,7 @@ the goal was to show that using C++14 and constexpr we could write expression te
 a little effort and an effective syntax. The goal now is to show how this idiom can evolve using C++17 constexpr lambdas, further 
 reducing the coding effort. 
 
-## In C++14
-
-To recap the C++14 original example, we start from the goal to achieve:
+To recap, we start from the goal to achieve:
 * Implementing univariate polynomials of the form
 ```C++
   constexpr auto expr = x*x*x+c(5.)*x*x+c(4.)*x+c(1.)
@@ -28,6 +26,8 @@ To recap the C++14 original example, we start from the goal to achieve:
 constexpr auto expr_dd = D(D(expr));
 ```
 
+## In C++14
+We start by describing the C++14 original example. The features which make the example "C++14" are mainly the use of "auto" and "constexpr". The former is (very handy) syntactic sugar and could be avoided with some extra coding, the latter is a language feature which allows to reuse the same code for both compile-time and run-time calculation.
 We define a placeholder for the independent variable "x", which is implementing the identity function, and instantiate a global variable "x" in order to compy with the our target syntax
 
 ```C++
@@ -42,7 +42,7 @@ struct p{
 };
 constexpr auto x=p();
 ```
-We can also define a constant representing the constant coefficient in the polynomial
+We can also define constants representing the coefficients in the polynomial
 ```C++
 template <typename T>
 struct s_c{
@@ -61,9 +61,10 @@ template <typename T>
 s_c c(T t){return s_c<T>(t);}
 ```
 
-It's the turn of the expressions "plus" and "times": function objects, which instantiate the two template arguments and return
-therir sum or multiplication respectively. We also overload the operators "+" and "*" to meet the target API. All these
-object functions are literal types, and the overload of their ```operator()``` is declared as constexpr
+It's the turn of the expressions "plus" and "times": function objects whose evaluation in turn evaluates 
+the template arguments and returns their sum or multiplication respectively. 
+We also overload the operators "+" and "*" to meet the target API. All these
+object functions are literal types, and the overload of their ```operator()``` is declared constexpr
 
 ```C++
 namespace expressions{
@@ -95,8 +96,7 @@ operator * (T1 arg1, T2 arg2){
     return expr_times<T1, T2 >();}
 ```
 Notice that there's no data members. The object functions representing the operations are stateless, 
-and all the information needed to parse an expression is contained in its type. Furthermore they are of literal type,
-and their default construction is free.
+and all the information needed to parse an expression is contained in its type.
 So far so good, we can evaluate expressions at compile time or run time
 
 ```C++
@@ -161,8 +161,7 @@ struct expr_derivative<expr_times<T1, T2> >{
 ```
 
 We left out the double derivative, which is more tricky since it must recursively call itself. You might have observed the definition of the 
-"value_t" type in the expressions above, which seems useless. It turns out to be necessary now, in the definition of the double derivative
-
+"value_t" type in the expressions above, which seems useless. It turns out to be necessary now
 ```C++
 template <typename T1>
 struct expr_derivative<expr_derivative<T1>>{
