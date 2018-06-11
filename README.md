@@ -9,9 +9,9 @@ reducing the coding effort.
 To recap, we start from the goal to achieve:
 * Implementing univariate polynomials of the form
 ```C++
-  constexpr auto expr = x*x*x+c(5.)*x*x+c(4.)*x+c(1.)
+  constexpr auto expr = x*x*x+x*x+x
 ```
-  in which "x" is the independent variable and "c" are constants (can be compile time constants). the "x"s are generic: could be real numbers, matrices, 
+  in which "x" is the independent variable. the "x"s are generic: could be real numbers, matrices, 
   vectors, functions, ...
 * Being able to lazily evaluate the expression
 ```C++
@@ -31,34 +31,18 @@ We start by describing the C++14 original example. The features which make the e
 We define a placeholder for the independent variable "x", which is implementing the identity function, and instantiate a global variable "x" in order to compy with the our target syntax
 
 ```C++
-struct p{
+struct p {
 
     constexpr p(){};
 
-    template<typename T>
-    constexpr T operator() (T t_) const {
+    template <typename T>
+    constexpr T operator()( T t_ ) const
+    {
         return t_;
     }
 };
-constexpr auto x=p();
-```
-We can also define constants representing the coefficients in the polynomial
-```C++
-template <typename T>
-struct s_c{
 
-    template<typename T>
-    constexpr s_c(T t1) : t1{t1_}{};
-    T1 t1;
-  
-    template<typename T>
-    constexpr T operator() (T t_) const {
-        return t1;
-    }
-};
-
-template <typename T>
-s_c c(T t){return s_c<T>(t);}
+constexpr auto x = p();
 ```
 
 It's the turn of the expressions "plus" and "times": function objects whose evaluation in turn evaluates 
@@ -68,34 +52,41 @@ object functions are literal types, and the overload of their ```operator()``` i
 
 ```C++
 template <typename T1, typename T2>
-struct expr_plus{
-    template<typename T>
-    constexpr auto operator() (T t_) const{
-        return T1()(t_)+T2()(t_);
+struct expr_plus {
+
+    template <typename T>
+    constexpr auto operator()( T t_ ) const
+    {
+        return T1()( t_ ) + T2()( t_ );
     }
 };
-
-template<typename T1, typename T2>
-constexpr expr_plus<T1, T2>
-operator + (T1 arg1, T2 arg2){
-return expr_plus<T1, T2 >();}
 
 template <typename T1, typename T2>
-struct expr_times{
+constexpr expr_plus<T1, T2>
+operator+( T1 arg1, T2 arg2 )
+{
+    return expr_plus<T1, T2>();
+}
 
-    template<typename T>
-    constexpr auto  operator() (T t_) const{
-        return T1()(t_)*T2()(t_);
+template <typename T1, typename T2>
+struct expr_times {
+
+    template <typename T>
+    constexpr auto operator()( T t_ ) const
+    {
+	return T1()( t_ ) * T2()( t_ );
     }
 };
 
-template<typename T1, typename T2>
+template <typename T1, typename T2>
 constexpr expr_times<T1, T2>
-operator * (T1 arg1, T2 arg2){
-    return expr_times<T1, T2 >();}
+operator*( T1 arg1, T2 arg2 )
+{
+    return expr_times<T1, T2>();
+}
 ```
 Notice that there's no data members. The object functions representing the operations are stateless, 
-and all the information needed to parse an expression is contained in its type.
+and all the information needed to parse an expression is contained in its type (which might be limiting, but for this simple example is ok).
 So far so good, we can evaluate expressions at compile time or run time
 
 ```C++
@@ -113,46 +104,50 @@ the case in which we take the derivative of a derivative expression.
 
 ```C++
 template <typename T1>
-struct expr_derivative{
+struct expr_derivative {
     using value_t = int;
+
     template <typename T>
-    constexpr T operator()(T t_) const {
-        return 0;
+    constexpr T operator()( T t_ ) const
+    {
+     	return 0;
     }
 };
 
-template<>
-struct expr_derivative<p>{
+template <>
+struct expr_derivative<p> {
 
     using value_t = int;
 
     template <typename T>
-    constexpr auto operator() (T t_) const{
-        return (T) 1;
+    constexpr auto operator()( T t_ ) const
+    {
+	return (T)1;
     }
 };
 
 template <typename T1, typename T2>
-struct expr_derivative<expr_plus<T1, T2> >{
+struct expr_derivative<expr_plus<T1, T2>> {
 
-    using value_t = decltype(D(T1())+ D(T2()));
+    using value_t = decltype( D( T1() ) + D( T2() ) );
 
     template <typename T>
-    constexpr auto operator() (T t_) const{
-        return value_t()(t_);
+    constexpr auto operator()( T t_ ) const
+    {
+        return value_t()( t_ );
     }
 };
 
 template <typename T1, typename T2>
-struct expr_derivative<expr_times<T1, T2> >{
+struct expr_derivative<expr_times<T1, T2>> {
 
-    using value_t = decltype(T1() * D(T2())
-                             +
-                             D(T1()) * T2());
+    using value_t = decltype( T1() * D( T2() )
+                              + D( T1() ) * T2() );
 
     template <typename T>
-    constexpr auto operator()(T t_)  const{
-        return value_t()(t_);
+    constexpr auto operator()( T t_ ) const
+    {
+     	return value_t()( t_ );
     }
 };
 ```
@@ -161,13 +156,14 @@ We left out the double derivative, which is more tricky since it must recursivel
 "value_t" type in the expressions above, which seems useless. It turns out to be necessary now
 ```C++
 template <typename T1>
-struct expr_derivative<expr_derivative<T1>>{
+struct expr_derivative<expr_derivative<T1>> {
 
     using value_t = expr_derivative<typename expr_derivative<T1>::value_t>;
 
     template <typename T>
-    constexpr auto operator() (T t_) const{
-        return value_t()(t_);
+    constexpr auto operator()( T t_ ) const
+    {
+        return value_t()( t_ );
     }
 };
 ```
@@ -183,8 +179,10 @@ Eventually we define our function "D" returning an instance of the derivative ex
 ```C++
 template <typename T1>
 constexpr expr_derivative<T1>
-D (T1 arg1){
-    return expr_derivative<T1>();}
+D( T1 arg1 )
+{
+    return expr_derivative<T1>();
+}
 ```
 
 We have now the full code for automatic differentiation of polynomials.
