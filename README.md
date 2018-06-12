@@ -41,7 +41,7 @@ std::cout<<dx(1.)(2.)+dy(1.)(2.);
 
 ## In C++14
 We start by describing the C++14 original example. The features which make the example "C++14" are mainly the use of "auto" and "constexpr", both introduced since C++11 and made more usable since C++14.
-We define a placeholder "p" for the independent variable, which is implementing the identity function, and instantiate a global variable "x" in order to comply with the our target syntax
+We define a placeholder "p" for the independent variable, which is implementing the identity function, and instantiate a global variable "x" in order to comply with our target syntax
 
 ```C++
 struct p {
