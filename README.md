@@ -216,8 +216,8 @@ defined above with constexpr generic lambdas. Below there is an equivalent code 
 uses the C++17 generic lambdas feature.
 
 We define the function objects "plus" and "times", with convenient overloads of the corresponding operators 
-"+" and "*", in a simila way as done for
-the previous example. These cannot be defined as constexpr lambdas for one main reasons: we need to access the type of the 
+"+" and "*", in a similar way as done for
+the previous example. These cannot be defined as constexpr lambdas for one main reason: we need to access the type of the 
 two arguments passed to the lambdas. More in detail, we can think of a generic lambda conceptually "as if" it was a functor like:
 
 ```C++
@@ -336,7 +336,7 @@ The implementation of the derivation is
 ## Extension
 
 We have shown so far how to build a simple Automatic Differentation idiom with C++14 and C++17 in about 60 lines of code. 
-What ifwe want to generalize the example further, including multivariate functions 
+What if we want to generalize the example further, including multivariate functions 
 (i.e. with more than one independent variable)?
 For instance
 
@@ -355,7 +355,7 @@ static assert(dx(5.)(5.)==dy(5.)(5.)), "error);
 We can do this with very little effort by substituting what we consider now a "value" with a univariate function,
 obtaining thus functions of functions (or high order functions, in functional programming terminology).
 
-We interpret a multivariate function as a function of functions (a high order function) so that we can
+We interpret a multivariate function as a high order function so that we can
  bind one of the variables to a value leaving the other free:
 the function
 
@@ -369,7 +369,7 @@ becomes a univariate function, and we can perform opearations on this partially 
 auto g = f+x(5.);
 ```
 
-In order to achieve that we change first of all the definition of our variable x, transforming it into a second order function which returns the first argument. 
+In order to achieve this we change first of all the definition of our variable x, transforming it into a function returning a function which returns the first argument. 
 We define another independent variable "y" which returns the second argument instead, while constants "c"
 return a value which is independent of both the arguments: 
 
@@ -419,7 +419,7 @@ and we have to specify a case in our "constexpr switch" for the derivative of "y
     constexpr auto Dy = [recursion,y](auto t){return recursion(y, t, recursion);};
 ```
 
-Ad that's it, all the operator defined for the previous example don't need any change, and we can
+And that's it, all the operators defined for the previous example don't need any change, and we can
  compute derivatives of multivariate functions as
 
 ```C++
