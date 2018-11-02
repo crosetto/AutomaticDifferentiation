@@ -24,7 +24,7 @@ To recap, we start from the goal we want to achieve:
 ```
 * Being able to compute the result of the expression as a compile time constant
 ```C++
-  constexpr res = expr(5.); 
+  constexpr auto res = expr(5.); 
 ```
 * Being able to compute the symbolic arbitrary order derivative of the expressions
 ```C++
